@@ -1,7 +1,7 @@
-import { tutorial } from '../data/content.js'
 import { Icon, StepVisual } from '../components/Illustrations.jsx'
 
-export default function Tutorial({ step, setStep, attempts, onBack, onFinish }) {
+export default function Tutorial({ technique, step, setStep, attempts, onBack, onFinish }) {
+  const { tutorial } = technique
   const total = tutorial.steps.length
   const s = tutorial.steps[step]
   const progress = ((step + 1) / total) * 100
@@ -9,7 +9,7 @@ export default function Tutorial({ step, setStep, attempts, onBack, onFinish }) 
 
   return (
     <section className="screen">
-      <p className="eyebrow">Paso 3 · Práctica guiada {attempts > 1 && <span className="tag tag-green">Intento {attempts}</span>}</p>
+      <p className="eyebrow">Paso 3 · {technique.name} {attempts > 1 && <span className="tag tag-green">Intento {attempts}</span>}</p>
       <h2 className="title">{tutorial.title}</h2>
       <p className="lead narrow goal"><Icon name="target" size={18} /> {tutorial.goal}</p>
 
@@ -33,7 +33,7 @@ export default function Tutorial({ step, setStep, attempts, onBack, onFinish }) 
 
       <article className="card step-card" key={step}>
         <figure className="step-figure">
-          <StepVisual visual={s.visual} />
+          <StepVisual technique={technique} step={step} />
           <figcaption><span>Resultado esperado</span>{s.expected}</figcaption>
         </figure>
         <div className="step-body">

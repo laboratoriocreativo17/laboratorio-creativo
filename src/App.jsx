@@ -10,12 +10,15 @@ import Feedback from './screens/Feedback.jsx'
 import Completed from './screens/Completed.jsx'
 import { analyzeImage } from './lib/analyzeImage.js'
 import { buildFeedback } from './lib/buildFeedback.js'
+import { getTechnique } from './data/techniques.js'
 
 // Orden del recorrido. "analyzing" es una pantalla de transición.
 const SCREENS = ['welcome', 'technique', 'materials', 'tutorial', 'share', 'analyzing', 'feedback', 'done']
 
 export default function App() {
   const [screen, setScreen] = useState('welcome')
+  const [techniqueId, setTechniqueId] = useState('grafito')
+  const technique = getTechnique(techniqueId)
   const [tutorialStep, setTutorialStep] = useState(0)
   const [image, setImage] = useState(null) // data URL
   const [question, setQuestion] = useState('')
@@ -41,7 +44,7 @@ export default function App() {
       m = null
     }
     setMetrics(m)
-    setFeedback(buildFeedback(question, m))
+    setFeedback(buildFeedback(technique, question, m))
     // Pequeña espera para que la transición se perciba (simulación).
     setTimeout(() => go('feedback'), 3200)
   }
@@ -72,13 +75,14 @@ export default function App() {
       <main ref={mainRef} tabIndex={-1} className="main" key={screen}>
         {screen === 'welcome' && <Welcome onStart={() => go('technique')} />}
         {screen === 'technique' && (
-          <TechniqueSelect onBack={() => go('welcome')} onChoose={() => go('materials')} />
+          <TechniqueSelect onBack={() => go('welcome')} onChoose={(id) => { setTechniqueId(id); setTutorialStep(0); setAttempts(1); setImage(null); setQuestion(''); go('materials') }} />
         )}
         {screen === 'materials' && (
-          <Materials onBack={() => go('technique')} onReady={() => { setTutorialStep(0); go('tutorial') }} />
+          <Materials technique={technique} onBack={() => go('technique')} onReady={() => { setTutorialStep(0); go('tutorial') }} />
         )}
         {screen === 'tutorial' && (
           <Tutorial
+            technique={technique}
             step={tutorialStep}
             setStep={setTutorialStep}
             attempts={attempts}
@@ -88,6 +92,7 @@ export default function App() {
         )}
         {screen === 'share' && (
           <ShareProgress
+            technique={technique}
             image={image}
             setImage={setImage}
             question={question}
@@ -96,9 +101,10 @@ export default function App() {
             onAnalyze={startAnalysis}
           />
         )}
-        {screen === 'analyzing' && <Analyzing image={image} />}
+        {screen === 'analyzing' && <Analyzing image={image} technique={technique} />}
         {screen === 'feedback' && feedback && (
           <Feedback
+            technique={technique}
             image={image}
             question={question}
             metrics={metrics}
@@ -108,7 +114,7 @@ export default function App() {
           />
         )}
         {screen === 'done' && (
-          <Completed image={image} feedback={feedback} attempts={attempts} onPracticeAgain={practiceAgain} onHome={restart} />
+          <Completed technique={technique} onOtherTechnique={() => go('technique')} image={image} feedback={feedback} attempts={attempts} onPracticeAgain={practiceAgain} onHome={restart} />
         )}
       </main>
       <footer className="footer">

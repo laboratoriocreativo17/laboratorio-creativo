@@ -1,11 +1,12 @@
 # Laboratorio Creativo — Prototipo funcional
 
 Prototipo navegable de la experiencia principal: una persona principiante aprende a
-hacer una escala de tonos con grafito, comparte una foto de su resultado y recibe
+hacer una escala de tonos con la técnica que elija, comparte una foto de su resultado y recibe
 recomendaciones de un acompañante de IA (simulado).
 
-Técnica del prototipo: **dibujo con grafito** — ejercicio “Aprende a crear una escala de
-degradación de tonos con grafito”.
+Técnicas activas: **dibujo con grafito, acuarela, pintura con café, puntillismo, esténcil y
+serigrafía**. Todas empiezan con el mismo ejercicio: una escala de cinco cuadros que va de lo
+más suave a lo más intenso. El contenido de cada técnica está en `src/data/techniques.js`.
 
 ## Cómo ejecutarlo
 
@@ -29,9 +30,9 @@ en el navegador o subir a cualquier hosting estático (Netlify, Vercel, GitHub P
 ## Recorrido
 
 1. **Bienvenida** — mensaje cercano y botón “Comenzar mi primera práctica”.
-2. **Selección de técnica** — tarjeta de Dibujo con grafito (nivel, 15–20 min, materiales) y técnicas próximas.
-3. **Preparación de materiales** — 6 tarjetas marcables (HB, 2B, 4B, papel, borrador, sacapuntas) + cómo organizar el espacio.
-4. **Tutorial paso a paso** — 5 pasos con referencia visual animada de la escala tonal,
+2. **Selección de técnica** — seis tarjetas con nivel, tiempo y materiales.
+3. **Preparación de materiales** — tarjetas marcables según la técnica + cómo organizar el espacio.
+4. **Tutorial paso a paso** — 5 pasos con una referencia visual animada en el estilo de cada técnica,
    instrucción, recomendación, “resultado esperado”, barra de progreso y navegación
    adelante/atrás (también desde los puntos de progreso).
 5. **Compartir mi avance** — carga desde el dispositivo (o arrastrar y soltar), vista previa,
@@ -45,14 +46,13 @@ en el navegador o subir a cualquier hosting estático (Netlify, Vercel, GitHub P
 Este prototipo **no está conectado a un modelo de IA**. Para ser transparentes, la
 pantalla de retroalimentación lo indica con un aviso y etiqueta cada sección:
 
-- **“Basado en mediciones de tu foto”** — la sección *Observación* se calcula de verdad,
-  en el navegador (`src/lib/analyzeImage.js`): localiza la zona dibujada, la divide en
-  cinco tramos a lo largo de la escala y mide el tono de cada uno. Con eso detecta el
-  orden claro → oscuro, el rango tonal, saltos bruscos entre casillas y la uniformidad.
-  Es una medición aproximada, no visión artificial.
-- **“Respuesta de ejemplo”** — *Dificultades, Recomendaciones y Próximo ejercicio* son
-  textos predefinidos (`src/data/content.js`), elegidos según palabras clave de la
-  pregunta (saltos bruscos, presión, uniformidad) o, si no hay pregunta, según las mediciones.
+- **“Visto en tu foto”**: la sección *Lo que vemos* y el panel *Así vemos tus cuadros* salen de
+  la foto (`src/lib/analyzeImage.js`): se busca la franja, se divide en cinco cuadros y cada uno
+  se compara con el blanco del papel que tiene al lado. Se muestra en frases sencillas, sin
+  números. Es una lectura aproximada, no visión artificial.
+- **“Consejo de ejemplo”**: *Lo que puede estar pasando, Prueba esto la próxima vez y Tu próximo reto* son
+  textos predefinidos para cada técnica (`src/data/techniques.js`), elegidos según palabras clave de la
+  pregunta o, si no hay pregunta, según lo que se ve en la foto o, si no hay pregunta, según las mediciones.
 
 La foto nunca sale del dispositivo.
 
@@ -62,7 +62,7 @@ Reemplaza `buildFeedback()` en `src/lib/buildFeedback.js` por una llamada a un b
 propio que envíe la imagen y la pregunta a un modelo multimodal y devuelva el mismo
 objeto (`observations`, `difficulties`, `recommendations`, `nextExercise`). La clave de
 API debe quedarse en el servidor, nunca en el frontend. Cuando el análisis sea real,
-cambia las etiquetas de `Badge` en `src/screens/Feedback.jsx` y retira el aviso de demo.
+cambia las etiquetas de `Badge` en `src/screens/Feedback.jsx` y retira el aviso de versión de prueba.
 
 ## Estructura
 
@@ -73,11 +73,11 @@ src/
 ├── styles.css              # sistema visual completo (paleta, tarjetas, animaciones)
 ├── components/
 │   ├── Header.jsx          # marca + indicador de recorrido
-│   └── Illustrations.jsx   # ilustraciones SVG con textura de grafito e iconos
+│   └── Illustrations.jsx   # escalas animadas de cada técnica e iconos
 ├── screens/                # una pantalla por archivo
-├── data/content.js         # textos, pasos y biblioteca de retroalimentación
+├── data/techniques.js      # las 6 técnicas: materiales, pasos, preguntas y consejos
 └── lib/
-    ├── analyzeImage.js     # mediciones de píxeles + foto de ejemplo
+    ├── analyzeImage.js     # lectura de la foto + foto de ejemplo
     └── buildFeedback.js    # arma la retroalimentación simulada
 ```
 

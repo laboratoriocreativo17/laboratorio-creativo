@@ -159,29 +159,28 @@ p.hint { display: block; margin: 8px 0; }
 @keyframes float { 50% { transform: translateY(-10px); } }
 
 /* ---------- Pantalla 2: Técnica ---------- */
-.technique-layout { display: grid; grid-template-columns: 1fr 280px; gap: 24px; margin-top: 28px; align-items: start; }
-.technique-card { display: grid; grid-template-columns: 1fr 1fr; overflow: hidden; transition: transform 0.4s var(--ease), box-shadow 0.4s var(--ease); }
-.technique-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+.technique-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; margin-top: 28px; }
+.technique-tile { display: flex; flex-direction: column; overflow: hidden; transition: transform 0.4s var(--ease), box-shadow 0.4s var(--ease); }
+.technique-tile:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
 .technique-media { position: relative; background: #f6f1fb; }
-.technique-art { width: 100%; height: 100%; display: block; min-height: 260px; }
-.technique-media { display: flex; align-items: center; }
-.technique-media .tag { position: absolute; top: 16px; left: 16px; }
-.technique-body { padding: 30px; display: flex; flex-direction: column; gap: 6px; }
-.technique-body > p { color: var(--ink-2); margin: 6px 0 18px; }
-.technique-head h3 { font-family: var(--serif); font-weight: 400; font-size: 2.2rem; margin: 0 0 8px; letter-spacing: -0.02em; }
+.technique-art-wrap { min-height: 0 !important; padding: 10px 14px 0 !important; }
+.technique-art-wrap svg { max-width: 100% !important; overflow: hidden !important; display: block; }
+.technique-media { overflow: hidden; }
+.technique-body { padding: 18px 22px 22px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
+.technique-body h3 { font-family: var(--serif); font-weight: 400; font-size: 1.6rem; margin: 0; letter-spacing: -0.02em; }
+.technique-body > p { color: var(--ink-2); margin: 2px 0 4px; font-size: 0.94rem; line-height: 1.5; }
 .meta { display: flex; gap: 8px; flex-wrap: wrap; }
-.mini-materials { list-style: none; padding: 0; margin: 0 0 24px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.mini-materials li { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; padding: 8px 10px; border-radius: 12px; background: var(--cream); }
-.mini-materials .material-icon { width: 28px; height: 28px; }
-.technique-body .btn { align-self: flex-start; }
-.upcoming ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
-.upcoming-item { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; border-radius: var(--radius-sm); border: 1px dashed var(--lavender-2); color: var(--ink-3); font-size: 0.92rem; }
+.mini-materials { display: flex; gap: 6px; align-items: center; margin: 2px 0 10px; }
+.mini-materials .material-icon { width: 34px; height: 34px; }
+.mini-materials .more { font-size: 0.8rem; font-weight: 600; color: var(--ink-3); padding-left: 4px; }
+.technique-body .btn { align-self: flex-start; margin-top: auto; }
+.material-icon { display: grid; place-items: center; width: 56px; height: 56px; border-radius: 50%; color: var(--mc); background: color-mix(in srgb, var(--mc) 12%, white); flex: none; }
 
 /* ---------- Pantalla 3: Materiales ---------- */
 .materials-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 28px 0 20px; }
 .material-card { position: relative; display: flex; flex-direction: column; align-items: flex-start; gap: 8px; padding: 22px; text-align: left; cursor: pointer; transition: transform 0.35s var(--ease), border-color 0.3s, background 0.3s, box-shadow 0.35s; }
 .material-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
-.material-card .material-icon { width: 56px; height: 56px; margin-bottom: 6px; transition: transform 0.4s var(--ease); }
+.material-card .material-icon { margin-bottom: 6px; transition: transform 0.4s var(--ease); }
 .material-card:hover .material-icon { transform: rotate(-6deg) scale(1.06); }
 .material-card strong { font-size: 1rem; }
 .material-card span:last-child { font-size: 0.86rem; color: var(--ink-2); line-height: 1.45; }
@@ -227,18 +226,20 @@ p.hint { display: block; margin: 8px 0; }
 .sv-outline > * { stroke-dasharray: 100; stroke-dashoffset: 0; }
 .sv-labels { opacity: 1; }
 .sv-arrows { opacity: 0; }
-.sv-pencil { opacity: 0; }
+.sv-tool { opacity: 0; }
+.sv-bob { animation: bob 0.5s ease-in-out infinite; }
+@keyframes bob { 50% { transform: translateY(-7px); } }
 
 /* 1. Preparar: se dibuja la franja */
 .step-visual--prepare .sv-outline > * { animation: drawLine 3s ease-in-out infinite; }
 .step-visual--prepare .sv-labels { opacity: 0.35; }
-.step-visual--prepare .sv-pencil { opacity: 1; animation: pencilOutline 3s ease-in-out infinite; }
+.step-visual--prepare .sv-tool { opacity: 1; animation: pencilOutline 3s ease-in-out infinite; }
 @keyframes drawLine { 0% { stroke-dashoffset: 100; } 60%, 100% { stroke-dashoffset: 0; } }
 @keyframes pencilOutline { 0% { transform: translate(30px, 70px); } 30% { transform: translate(290px, 70px); } 45% { transform: translate(290px, 146px); } 60% { transform: translate(30px, 146px); } 75%, 100% { transform: translate(30px, 70px); opacity: 0; } }
 
 /* 2. Tono claro: casilla 1 */
 .step-visual--light .sv-box-1 { animation: fillBox 2.8s ease-in-out infinite; }
-.step-visual--light .sv-pencil { opacity: 1; animation: hatch1 2.8s ease-in-out infinite; }
+.step-visual--light .sv-tool { opacity: 1; animation: hatch1 2.8s ease-in-out infinite; }
 @keyframes fillBox { 0% { opacity: 0; transform: scaleX(0); } 55%, 100% { opacity: 1; transform: scaleX(1); } }
 @keyframes hatch1 {
   0% { transform: translate(36px, 140px); } 10% { transform: translate(46px, 80px); } 20% { transform: translate(52px, 140px); }
@@ -250,7 +251,7 @@ p.hint { display: block; margin: 8px 0; }
 .step-visual--mid .sv-box-1 { opacity: 1; transform: none; }
 .step-visual--mid .sv-box-2 { animation: fillBox 3.2s ease-in-out infinite; }
 .step-visual--mid .sv-box-3 { animation: fillBox2 3.2s ease-in-out infinite; }
-.step-visual--mid .sv-pencil { opacity: 1; animation: hatchMid 3.2s ease-in-out infinite; }
+.step-visual--mid .sv-tool { opacity: 1; animation: hatchMid 3.2s ease-in-out infinite; }
 @keyframes fillBox2 { 0%, 35% { opacity: 0; transform: scaleX(0); } 80%, 100% { opacity: 1; transform: scaleX(1); } }
 @keyframes hatchMid { 0% { transform: translate(86px, 140px); } 20% { transform: translate(128px, 80px); } 40% { transform: translate(140px, 140px); } 65% { transform: translate(180px, 80px); } 80%, 100% { transform: translate(180px, 80px); opacity: 0; } }
 
@@ -258,8 +259,25 @@ p.hint { display: block; margin: 8px 0; }
 .step-visual--dark .sv-box-1, .step-visual--dark .sv-box-2, .step-visual--dark .sv-box-3 { opacity: 1; transform: none; }
 .step-visual--dark .sv-box-4 { animation: fillBox 3.2s ease-in-out infinite; }
 .step-visual--dark .sv-box-5 { animation: fillBox2 3.2s ease-in-out infinite; }
-.step-visual--dark .sv-pencil { opacity: 1; animation: hatchDark 3.2s ease-in-out infinite; }
+.step-visual--dark .sv-tool { opacity: 1; animation: hatchDark 3.2s ease-in-out infinite; }
 @keyframes hatchDark { 0% { transform: translate(190px, 140px); } 20% { transform: translate(232px, 80px); } 40% { transform: translate(244px, 140px); } 65% { transform: translate(284px, 80px); } 80%, 100% { transform: translate(284px, 80px); opacity: 0; } }
+
+
+/* Esponja (esténcil): toques sobre cada cuadro */
+.step-visual--light .sv-tool.tool-sponge { animation: sponge1 2.8s ease-in-out infinite; }
+.step-visual--mid .sv-tool.tool-sponge { animation: sponge23 3.2s ease-in-out infinite; }
+.step-visual--dark .sv-tool.tool-sponge { animation: sponge45 3.2s ease-in-out infinite; }
+@keyframes sponge1 { 0%, 100% { transform: translate(56px, 100px); } 50% { transform: translate(60px, 120px); } }
+@keyframes sponge23 { 0%, 40% { transform: translate(108px, 112px); } 55%, 90% { transform: translate(160px, 112px); } 100% { transform: translate(160px, 112px); opacity: 0; } }
+@keyframes sponge45 { 0%, 40% { transform: translate(212px, 112px); } 55%, 90% { transform: translate(264px, 112px); } 100% { transform: translate(264px, 112px); opacity: 0; } }
+/* Racle (serigrafía): pasada de un lado a otro */
+.step-visual--light .sv-tool.tool-squeegee { animation: sweep1 2.8s ease-in-out infinite; }
+.step-visual--mid .sv-tool.tool-squeegee { animation: sweep23 3.2s ease-in-out infinite; }
+.step-visual--dark .sv-tool.tool-squeegee { animation: sweep45 3.2s ease-in-out infinite; }
+@keyframes sweep1 { 0% { transform: translate(56px, 66px); } 60%, 100% { transform: translate(56px, 150px); } }
+@keyframes sweep23 { 0% { transform: translate(108px, 66px); } 40% { transform: translate(108px, 150px); } 50% { transform: translate(160px, 66px); } 90%, 100% { transform: translate(160px, 150px); } }
+@keyframes sweep45 { 0% { transform: translate(212px, 66px); } 40% { transform: translate(212px, 150px); } 50% { transform: translate(264px, 66px); } 90%, 100% { transform: translate(264px, 150px); } }
+.step-visual--prepare .sv-tool.tool-sponge, .step-visual--prepare .sv-tool.tool-squeegee { opacity: 0; animation: none; }
 
 /* 5. Unificar: escala completa + transiciones */
 .step-visual--unify .sv-box { opacity: 1; transform: none; }
@@ -317,20 +335,27 @@ textarea:focus { outline: none; border-color: var(--lilac); box-shadow: 0 0 0 4p
 .fb-aside { position: sticky; top: 90px; }
 .photo-card { padding: 14px; }
 .photo-card img { width: 100%; max-height: 340px; object-fit: contain; border-radius: 14px; background: #f4f1ec; }
-.measure { padding: 18px 6px 4px; }
-.tone-scale { margin-bottom: 14px; }
-.tone-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; }
-.tone-cell { position: relative; display: flex; flex-direction: column; align-items: center; gap: 4px; animation: enter 0.5s var(--ease) both; }
-.tone-cell:nth-child(2) { animation-delay: 0.08s; } .tone-cell:nth-child(3) { animation-delay: 0.16s; }
-.tone-cell:nth-child(4) { animation-delay: 0.24s; } .tone-cell:nth-child(5) { animation-delay: 0.32s; }
-.tone-swatch { width: 100%; aspect-ratio: 1; border-radius: 8px; border: 1px solid rgba(0, 0, 0, 0.08); }
-.tone-val { font-size: 0.75rem; font-weight: 600; color: var(--ink-2); }
-.tone-jump { position: absolute; right: -9px; top: 50%; transform: translateY(-120%); z-index: 1; width: 16px; height: 16px; border-radius: 50%; background: var(--rose-ink); color: #fff; font-size: 0.7rem; font-weight: 700; display: grid; place-items: center; box-shadow: 0 0 0 2px var(--paper); }
-.measure dl { margin: 0 0 4px; display: grid; gap: 8px; }
-.measure dl div { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 0.86rem; border-bottom: 1px dashed var(--line); padding-bottom: 6px; }
-.measure dt { color: var(--ink-3); }
-.measure dd { margin: 0; font-weight: 600; display: flex; align-items: center; gap: 6px; text-transform: capitalize; text-align: right; }
-.swatch { width: 14px; height: 14px; border-radius: 50%; border: 1px solid rgba(0, 0, 0, 0.1); flex: none; }
+.reading { padding: 18px 6px 4px; }
+.reading-title { font-family: var(--serif); font-weight: 400; font-size: 1.25rem; margin: 0 0 12px; }
+.swatches { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+.swatch-cell { display: flex; flex-direction: column; align-items: center; gap: 4px; animation: enter 0.5s var(--ease) both; }
+.swatch-cell:nth-child(2) { animation-delay: 0.08s; } .swatch-cell:nth-child(3) { animation-delay: 0.16s; }
+.swatch-cell:nth-child(4) { animation-delay: 0.24s; } .swatch-cell:nth-child(5) { animation-delay: 0.32s; }
+.swatch-box { width: 100%; aspect-ratio: 1; border-radius: 10px; border: 1px solid rgba(0, 0, 0, 0.08); }
+.swatch-n { font-size: 0.78rem; font-weight: 600; color: var(--ink-3); }
+.swatch-arrow { display: flex; align-items: center; gap: 8px; font-size: 0.75rem; color: var(--ink-3); margin: 6px 0 14px; }
+.swatch-arrow i { flex: 1; height: 2px; background: linear-gradient(90deg, var(--lavender-2), var(--violet)); position: relative; border-radius: 2px; }
+.swatch-arrow i::after { content: ''; position: absolute; right: -2px; top: -4px; border: 5px solid transparent; border-left: 7px solid var(--violet); border-right: 0; }
+.checks { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+.checks li { display: flex; gap: 10px; align-items: flex-start; font-size: 0.92rem; line-height: 1.4; padding: 10px 12px; border-radius: 12px; }
+.checks li.is-ok { background: var(--green); color: #24543a; }
+.checks li.is-tip { background: #fff3d6; color: #6b5320; }
+.check-ico { flex: none; width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; background: #fff; }
+.is-ok .check-ico { color: var(--green-ink); }
+.is-tip .check-ico { color: #b07d10; }
+.reading-note { font-size: 0.78rem; color: var(--ink-3); margin: 10px 2px 2px; }
+.fb-section p { margin: 0 0 6px; color: var(--ink-2); }
+.fb-section p:last-child { margin-bottom: 0; }
 
 .conversation { display: flex; flex-direction: column; gap: 14px; }
 .bubble { border-radius: var(--radius); animation: enter 0.6s var(--ease) both; }
@@ -382,7 +407,8 @@ textarea:focus { outline: none; border-color: var(--lilac); box-shadow: 0 0 0 4p
   .welcome { grid-template-columns: 1fr; gap: 10px; min-height: auto; }
   .welcome-art { order: -1; max-width: 340px; margin: 0 auto 28px; }
   .how-it-works { grid-template-columns: 1fr 1fr; }
-  .technique-layout, .share-layout, .feedback-layout { grid-template-columns: 1fr; }
+  .technique-grid { grid-template-columns: 1fr 1fr; }
+  .share-layout, .feedback-layout { grid-template-columns: 1fr; }
   .materials-grid { grid-template-columns: 1fr 1fr; }
   .fb-aside { position: static; }
   .journey-label { display: none; }
@@ -391,10 +417,10 @@ textarea:focus { outline: none; border-color: var(--lilac); box-shadow: 0 0 0 4p
 @media (max-width: 680px) {
   .main { padding: 4px 18px 40px; }
   .header { padding: 12px 18px; }
-  .technique-card, .step-card { grid-template-columns: 1fr; }
+  .technique-grid, .step-card { grid-template-columns: 1fr; }
   .step-visual { min-height: 200px; }
   .step-body { padding: 26px 22px; }
-  .tips-list, .mini-materials { grid-template-columns: 1fr; }
+  .tips-list { grid-template-columns: 1fr; }
   .materials-grid { grid-template-columns: 1fr; }
   .journey { display: none; }
   .actions-bar .btn { flex: 1; }

@@ -1,71 +1,92 @@
-import { feedbackLibrary, nextExercises } from '../data/content.js'
+// Arma la retroalimentación SIMULADA, en lenguaje sencillo.
+// Combina: (1) la pregunta del usuario, (2) la lectura de la foto
+// (lib/analyzeImage.js) y (3) los consejos escritos para cada técnica
+// (data/techniques.js). En una versión real, esto lo haría un modelo de IA.
 
-// Construye la retroalimentación SIMULADA combinando:
-// 1) La pregunta del usuario (búsqueda de palabras clave).
-// 2) Mediciones aproximadas de píxeles (lib/analyzeImage.js).
-// En una versión real, esta función se reemplazaría por una llamada
-// a un modelo multimodal (ver README).
+const QUESTION_WORDS = {
+  saltos: ['brusco', 'salto', 'golpe', 'transición', 'transicion', 'cambio'],
+  parecidos: ['igual', 'parecid', 'mismo', 'misma', 'no se nota'],
+  intensidad: ['pálido', 'palido', 'claro', 'oscuro', 'intens', 'fuerte'],
+}
 
-function pickTopic(question, m) {
+function pickTopic(technique, question, m) {
   const q = (question || '').toLowerCase()
-  for (const [key, entry] of Object.entries(feedbackLibrary)) {
-    if (entry.match.some((w) => q.includes(w))) return { key, reason: 'question' }
+  const has = (words = []) => words.some((w) => q.includes(w))
+  if (q) {
+    if (has(QUESTION_WORDS.saltos)) return 'saltos'
+    if (has(technique.keywords.parejo)) return 'parejo'
+    if (has(QUESTION_WORDS.parecidos)) return 'parecidos'
+    if (has([...(technique.keywords.intensidad || []), ...QUESTION_WORDS.intensidad])) return 'intensidad'
   }
   if (m) {
-    if (m.jumps.length > 0) return { key: 'transiciones', reason: 'metrics' }
-    if (m.contrast === 'reducido') return { key: 'variedad', reason: 'metrics' }
-    if (m.uniformity === 'baja') return { key: 'uniformidad', reason: 'metrics' }
+    if (m.bigJumps.length) return 'saltos'
+    if (m.tooSimilar.length) return 'parecidos'
+    if (m.darkest < technique.darkGoal) return 'intensidad'
   }
-  return { key: 'general', reason: 'default' }
+  return 'general'
 }
 
-const edge = (m, first) => {
-  if (m.orientation === 'horizontal') return first ? 'izquierda' : 'derecha'
-  return first ? 'arriba' : 'abajo'
+// Lo que mostramos en el panel "Así vemos tus cuadros": frases cortas, sin números
+export function buildChecks(technique, m) {
+  if (!m) return []
+  const checks = []
+  checks.push(
+    m.outOfOrder.length
+      ? { ok: false, text: `El cuadro ${m.outOfOrder[0]} quedó más suave que el anterior.` }
+      : { ok: true, text: 'Tus cuadros van de lo más suave a lo más intenso, en orden.' },
+  )
+  if (m.bigJumps.length) {
+    const n = m.bigJumps[0]
+    checks.push({ ok: false, text: `Del cuadro ${n} al ${n + 1} el cambio es muy grande.` })
+  } else if (m.tooSimilar.length) {
+    const n = m.tooSimilar[0]
+    checks.push({ ok: false, text: `Los cuadros ${n} y ${n + 1} se ven casi iguales.` })
+  } else {
+    checks.push({ ok: true, text: 'De un cuadro a otro, los cambios se ven parejos.' })
+  }
+  checks.push(
+    m.darkest >= technique.darkGoal
+      ? { ok: true, text: 'El último cuadro llegó a un tono bien intenso.' }
+      : { ok: false, text: 'Al último cuadro todavía le cabe más intensidad.' },
+  )
+  return checks
 }
 
-function buildObservations(m) {
-  if (!m) {
-    return ['No fue posible leer la imagen en este dispositivo, así que no hay observaciones sobre tu foto.']
-  }
+function buildObservation(technique, m, checks, topic, fromQuestion) {
+  if (!m) return ['No pudimos leer bien tu foto, así que te dejamos consejos generales para esta técnica.']
+  const good = checks.filter((c) => c.ok).length
   const obs = []
-  const lightSide = m.darkening ? edge(m, true) : edge(m, false)
-  const darkSide = m.darkening ? edge(m, false) : edge(m, true)
-  if (m.monotonic) {
-    obs.push(`El tono se oscurece de forma progresiva de ${lightSide} a ${darkSide}: tu escala sigue el orden de claro a oscuro que busca el ejercicio.`)
-  } else {
-    obs.push(`En general el tono va de ${lightSide} a ${darkSide}, aunque en algún punto una casilla queda más clara que la anterior. Puede ser por la luz de la foto o por la presión en esa zona.`)
+  if (good === 3) obs.push('¡Se ve muy bien! Tu escala avanza de lo suave a lo intenso con pasos parejos.')
+  else if (good === 2) obs.push('Vas por muy buen camino: la mayor parte de tu escala funciona.')
+  else obs.push('Ya tienes la base de la escala, y hay un par de cosas fáciles de mejorar.')
+  const firstIssue = checks.find((c) => !c.ok)
+  if (firstIssue) obs.push(`Lo que más nos llamó la atención: ${firstIssue.text.charAt(0).toLowerCase()}${firstIssue.text.slice(1)}`)
+  const related = { saltos: 1, parecidos: 1, intensidad: 2 }[topic]
+  if (fromQuestion && related !== undefined && checks[related]?.ok) {
+    obs.push('Sobre tu pregunta: en tu foto eso ya se ve bastante bien. Igual te dejamos ideas para afinarlo todavía más.')
   }
-  obs.push(`El tono más claro tiene aproximadamente un ${m.lightest} % de oscuridad y el más oscuro un ${m.darkest} %, así que el rango tonal es ${m.contrast}.`)
-  if (m.jumps.length) {
-    const pares = m.jumps.map((n) => `${n} y ${n + 1}`).join(', ')
-    obs.push(`El paso entre las casillas ${pares} es bastante mayor que los demás: ahí se nota un cambio más brusco.`)
-  } else {
-    obs.push('Los pasos entre casillas tienen un tamaño parecido, lo que da una transición bastante equilibrada.')
-  }
-  const u = {
-    alta: 'El tono dentro de cada casilla se ve bastante parejo.',
-    media: 'Dentro de algunas casillas hay pequeñas variaciones de tono, algo muy común al empezar.',
-    baja: 'Dentro de las casillas hay bastante variación; podrían ser trazos visibles, zonas con distinta presión o sombras en la foto.',
-  }
-  obs.push(u[m.uniformity])
+  if (!m.found) obs.push('No logramos encontrar bien la franja en la foto, así que esta lectura puede no ser exacta. Una foto más cerca y de frente ayuda.')
   return obs
 }
 
-export function buildFeedback(question, metrics) {
-  const topic = pickTopic(question, metrics)
-  const entry = feedbackLibrary[topic.key]
+export function buildFeedback(technique, question, metrics) {
+  const topic = pickTopic(technique, question, metrics)
+  const entry = technique.feedback[topic]
+  const checks = buildChecks(technique, metrics)
+  const fromQuestion = !!question?.trim() && topic !== 'general'
   const opener = question?.trim()
-    ? 'Gracias por compartir tu escala y tu pregunta. Mirar tu propio dibujo con atención es una de las habilidades más valiosas que puedes desarrollar.'
-    : 'Gracias por compartir tu escala. Terminar tu primera degradación de tonos ya es un gran paso.'
+    ? '¡Gracias por compartir tu práctica y tu pregunta! Vamos a verla juntos.'
+    : '¡Gracias por compartir tu práctica! Vamos a verla juntos.'
   return {
-    topic: topic.key,
-    topicReason: topic.reason,
+    topic,
+    fromQuestion,
+    allGood: checks.length > 0 && checks.every((c) => c.ok),
     opener,
-    observations: buildObservations(metrics),
-    difficulties: entry.difficulties,
-    recommendations: entry.recommendations,
-    nextExercise: topic.key === 'transiciones' ? nextExercises[1] : nextExercises[0],
-    closing: 'Cada escala que haces entrena tu mano y tu mirada. ¡Sigue practicando!',
+    checks,
+    observations: buildObservation(technique, metrics, checks, topic, fromQuestion),
+    difficulties: entry.diff,
+    recommendations: entry.recs,
+    nextExercise: topic === 'saltos' || topic === 'parecidos' ? technique.next[1] : technique.next[0],
+    closing: 'Cada intento te enseña algo nuevo. ¡Sigue experimentando!',
   }
 }

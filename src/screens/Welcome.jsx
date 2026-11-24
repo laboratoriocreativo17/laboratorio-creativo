@@ -21,7 +21,7 @@ export default function Welcome({ onStart }) {
           <button className="btn btn-primary btn-lg" onClick={onStart}>
             Comenzar mi primera práctica <Icon name="arrow-right" />
           </button>
-          <span className="hint"><Icon name="clock" size={16} /> Tu primera práctica toma de 15 a 20 minutos</span>
+          <span className="hint"><Icon name="clock" size={16} /> Seis técnicas para empezar, de 15 a 60 minutos</span>
         </div>
         <ul className="how-it-works" aria-label="Cómo funciona">
           <li><span className="hiw-num">1</span><div><strong>Aprende</strong><span>Pasos cortos y visuales</span></div></li>

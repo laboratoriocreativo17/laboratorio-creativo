@@ -1,4 +1,7 @@
 import { useId } from 'react'
+import { Circle, CreditCard, Frame, Layers, Square, Scissors, Ruler, PenLine, CupSoda, Coffee, Droplets, Paintbrush, Palette, FileText, StickyNote, Eraser, PenTool, Pencil as PencilIcon, Sparkles } from 'lucide-react'
+
+const LucideIcons = { Circle, CreditCard, Frame, Layers, Square, Scissors, Ruler, PenLine, CupSoda, Coffee, Droplets, Paintbrush, Palette, FileText, StickyNote, Eraser, PenTool, Pencil: PencilIcon, Sparkles }
 
 /* Ilustraciones SVG hechas a mano (sin imágenes externas).
    Los grises se reservan para el grafito; la interfaz conserva la paleta
@@ -94,133 +97,184 @@ export function HeroArt() {
   )
 }
 
-export function TechniqueArt() {
-  const id = uid()
+/* ------------------------------------------------------------------
+   Escala de 5 cuadros con el estilo de cada técnica
+   (se usa en la tarjeta de la técnica y en cada paso del tutorial)
+------------------------------------------------------------------- */
+const BX = 30, BW = 52, BY = 70, BH = 76
+const STATES = ['prepare', 'light', 'mid', 'dark', 'unify']
+const DOT_SPACING = [10, 7.4, 5.6, 4.3, 3.3]
+
+function TechniqueDefs({ id, technique }) {
   return (
-    <svg viewBox="0 0 320 220" className="technique-art" aria-hidden="true">
-      <defs>
-        <GraphiteDefs id={id} />
-        <radialGradient id={`ts-${id}`} cx="36%" cy="32%" r="72%">
-          <stop offset="0%" stopColor="#f2f0f3" />
-          <stop offset="40%" stopColor="#aeabb3" />
-          <stop offset="100%" stopColor="#3b3940" />
-        </radialGradient>
-      </defs>
-      <rect width="320" height="220" fill="#f6f1fb" />
-      <rect x="28" y="22" width="264" height="176" rx="4" fill="#fffdf9" filter={`url(#paper-${id})`} />
-      <g filter={`url(#grain-${id})`}>
-        <circle cx="160" cy="88" r="44" fill={`url(#ts-${id})`} />
-        {GRAPHITE_TONES.map((t, i) => <rect key={t} x={60 + i * 40} y="148" width="40" height="28" fill={t} />)}
-        <rect x="60" y="148" width="200" height="28" fill={`url(#hatch-${id})`} />
-      </g>
-      <ellipse cx="172" cy="134" rx="40" ry="6" fill="#2c2a30" opacity="0.18" />
-    </svg>
+    <>
+      <GraphiteDefs id={id} />
+      <filter id={`wash-${id}`} x="-5%" y="-5%" width="110%" height="110%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="7" result="n" />
+        <feDisplacementMap in="SourceGraphic" in2="n" scale="5" xChannelSelector="R" yChannelSelector="G" />
+      </filter>
+      <filter id={`sponge-${id}`} x="0" y="0" width="100%" height="100%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.42" numOctaves="2" seed="11" result="n" />
+        <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -3 2.1" result="a" />
+        <feComposite in="SourceGraphic" in2="a" operator="in" />
+      </filter>
+      <filter id={`patchy-${id}`} x="0" y="0" width="100%" height="100%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.09" numOctaves="2" seed="3" result="n" />
+        <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -4 2.6" result="a" />
+        <feComposite in="SourceGraphic" in2="a" operator="in" />
+      </filter>
+      {DOT_SPACING.map((s, i) => (
+        <pattern key={s} id={`dots-${i}-${id}`} width={s} height={s} patternUnits="userSpaceOnUse" patternTransform={`rotate(${i * 17})`}>
+          <circle cx={s / 2} cy={s / 2} r="1.05" fill={technique.palette[i]} />
+        </pattern>
+      ))}
+    </>
   )
 }
 
-export function MaterialIcon({ type }) {
-  const common = { viewBox: '0 0 64 64', className: 'material-icon', 'aria-hidden': true }
-  const pencilIcon = (label, body, lead) => (
-    <svg {...common}>
-      <g transform="rotate(40 32 32)">
-        <rect x="27" y="6" width="10" height="38" fill={body} />
-        <rect x="27" y="6" width="3.3" height="38" fill="#000" opacity="0.08" />
-        <path d="M27 44 L32 58 L37 44 Z" fill="#f1dcc0" />
-        <path d="M30.2 53 L32 58 L33.8 53 Z" fill={lead} />
-        <rect x="26.5" y="2" width="11" height="5" rx="1" fill="#c9c2d4" />
-      </g>
-      <text x="8" y="58" fontSize="13" fontWeight="700" fill="#2e2a36" fontFamily="sans-serif">{label}</text>
-    </svg>
+function Box({ i, id, technique }) {
+  const x = BX + i * BW
+  const c = technique.palette[i]
+  let body
+  switch (technique.fill) {
+    case 'hatch':
+      body = (
+        <g filter={`url(#grain-${id})`}>
+          <rect x={x} y={BY} width={BW} height={BH} fill={c} />
+          <rect x={x} y={BY} width={BW} height={BH} fill={`url(#hatch-${id})`} />
+        </g>
+      )
+      break
+    case 'wash':
+      body = <rect x={x + 2} y={BY + 2} width={BW - 4} height={BH - 4} fill={c} stroke={c} strokeWidth="2" strokeOpacity="0.6" filter={`url(#wash-${id})`} />
+      break
+    case 'dots':
+      body = <rect x={x} y={BY} width={BW} height={BH} fill={`url(#dots-${i}-${id})`} />
+      break
+    case 'sponge':
+      body = (
+        <g>
+          <rect x={x + 3} y={BY + 3} width={BW - 6} height={BH - 6} fill={c} opacity="0.55" />
+          <rect x={x + 3} y={BY + 3} width={BW - 6} height={BH - 6} fill={c} filter={`url(#sponge-${id})`} />
+        </g>
+      )
+      break
+    default: // print
+      body = <rect x={x + 3} y={BY + 3} width={BW - 6} height={BH - 6} fill={c} filter={i < 2 ? `url(#patchy-${id})` : undefined} />
+  }
+  return (
+    <g className={`sv-box sv-box-${i + 1}`} style={{ transformOrigin: `${x}px ${BY}px` }}>
+      {body}
+    </g>
   )
+}
+
+function Tool({ type, color }) {
   switch (type) {
-    case 'pencil-hb': return pencilIcon('HB', '#cbbcf0', '#8c8992')
-    case 'pencil-2b': return pencilIcon('2B', '#9b7fe0', '#5a5760')
-    case 'pencil-4b': return pencilIcon('4B', '#6b4fc0', '#2c2a30')
-    case 'pencils':
+    case 'brush':
       return (
-        <svg {...common}>
-          {[['#cbbcf0', 14], ['#9b7fe0', 28], ['#6b4fc0', 42]].map(([c, x]) => (
-            <g key={x}>
-              <rect x={x} y="10" width="8" height="34" fill={c} />
-              <path d={`M${x} 44 L${x + 4} 56 L${x + 8} 44 Z`} fill="#f1dcc0" />
-              <path d={`M${x + 2.6} 52 L${x + 4} 56 L${x + 5.4} 52 Z`} fill="#2c2a30" />
-            </g>
-          ))}
-        </svg>
+        <g transform="rotate(35)">
+          <path d="M0 0 Q-4.5 -8 -4 -18 L4 -18 Q4.5 -8 0 0 Z" fill={color} />
+          <rect x="-4.5" y="-28" width="9" height="11" rx="1.5" fill="#c9c2d4" />
+          <rect x="-3.5" y="-96" width="7" height="69" rx="3.5" fill="#3a3346" />
+        </g>
       )
-    case 'paper':
+    case 'pen':
       return (
-        <svg {...common}>
-          <rect x="12" y="8" width="40" height="48" rx="3" fill="#fffdf8" stroke="#3a3346" strokeWidth="2.5" />
-          {GRAPHITE_TONES.map((t, i) => <rect key={t} x={17 + i * 6} y="40" width="6" height="8" fill={t} />)}
-          <path d="M18 18h28M18 25h18" stroke="#cbbcf0" strokeWidth="3" strokeLinecap="round" />
-        </svg>
+        <g transform="rotate(25)">
+          <path d="M0 0 L-2 -8 L2 -8 Z" fill="#2c2a30" />
+          <rect x="-4.5" y="-30" width="9" height="22" rx="2" fill="#8b8697" />
+          <rect x="-5" y="-92" width="10" height="64" rx="4" fill="#2e2a36" />
+          <rect x="-5.5" y="-80" width="2" height="30" rx="1" fill="#6b4fc0" />
+        </g>
       )
-    case 'eraser':
+    case 'sponge':
       return (
-        <svg {...common}>
-          <g transform="rotate(-25 32 32)">
-            <rect x="10" y="22" width="44" height="20" rx="4" fill="#fbe1ec" stroke="#3a3346" strokeWidth="2.5" />
-            <rect x="10" y="22" width="18" height="20" rx="4" fill="#b59cf0" stroke="#3a3346" strokeWidth="2.5" />
-          </g>
-          <path d="M14 54c6-2 12 1 18-1" stroke="#b3b0b8" strokeWidth="2" fill="none" strokeLinecap="round" />
-        </svg>
+        <g className="sv-bob">
+          <rect x="-16" y="-26" width="32" height="26" rx="7" fill="#F3D36B" stroke="#c9a33d" strokeWidth="1.2" />
+          <circle cx="-7" cy="-17" r="2" fill="#e0b84a" />
+          <circle cx="5" cy="-9" r="2.4" fill="#e0b84a" />
+          <circle cx="7" cy="-20" r="1.6" fill="#e0b84a" />
+          <rect x="-16" y="-5" width="32" height="5" rx="2" fill={color} opacity="0.8" />
+        </g>
       )
-    case 'sharpener':
+    case 'squeegee':
       return (
-        <svg {...common}>
-          <rect x="14" y="20" width="36" height="28" rx="5" fill="#e3f2e8" stroke="#3a3346" strokeWidth="2.5" />
-          <circle cx="28" cy="34" r="7" fill="#fffdf8" stroke="#3a3346" strokeWidth="2" />
-          <rect x="38" y="24" width="8" height="20" rx="1.5" fill="#c9c2d4" />
-          <path d="M20 14c3 2 5 1 8-1" stroke="#b3b0b8" strokeWidth="2" fill="none" strokeLinecap="round" />
-        </svg>
+        <g>
+          <rect x="-4" y="-48" width="8" height="34" rx="3" fill="#3a3346" />
+          <rect x="-24" y="-16" width="48" height="10" rx="3" fill="#c9c2d4" />
+          <rect x="-24" y="-7" width="48" height="7" rx="2" fill={color} />
+        </g>
       )
-    default:
-      return null
+    default: // pencil
+      return (
+        <g transform="rotate(35)">
+          <path d="M0 0 L-5 -14 L5 -14 Z" fill="#f1dcc0" />
+          <path d="M0 0 L-1.8 -5 L1.8 -5 Z" fill="#2c2a30" />
+          <rect x="-5" y="-96" width="10" height="82" fill="#6b4fc0" />
+          <rect x="-5.5" y="-106" width="11" height="10" rx="1" fill="#c9c2d4" />
+          <rect x="-5" y="-116" width="10" height="10" rx="3" fill="#e9a9c4" />
+        </g>
+      )
   }
 }
 
+export function ScaleArt({ technique, state = 'unify', showTool = false, showLabels = true, showArrows = true, viewBox = '0 0 320 220', className = '' }) {
+  const id = useId().replace(/:/g, '')
+  return (
+    <svg viewBox={viewBox} className={className} aria-hidden="true">
+      <defs><TechniqueDefs id={id} technique={technique} /></defs>
+      <rect x="14" y="20" width="292" height="184" rx="6" fill="#fffdf9" filter={`url(#paper-${id})`} />
+      <rect x="14" y="20" width="292" height="184" rx="6" fill="none" stroke="#e5dcf2" strokeWidth="1.5" />
+      {[0, 1, 2, 3, 4].map((i) => <Box key={i} i={i} id={id} technique={technique} />)}
+      <g className="sv-outline" fill="none" stroke="#5a5760" strokeWidth="1.1">
+        <rect x={BX} y={BY} width={BW * 5} height={BH} pathLength="100" />
+        {[1, 2, 3, 4].map((i) => <line key={i} x1={BX + i * BW} y1={BY} x2={BX + i * BW} y2={BY + BH} pathLength="100" />)}
+      </g>
+      {showLabels && (
+        <g className="sv-labels" fontFamily="sans-serif" fontSize="9.5" fontWeight="600" fill="#8b8697" textAnchor="middle">
+          {technique.boxLabels.map((l, i) => <text key={i} x={BX + i * BW + BW / 2} y={BY + BH + 18}>{l}</text>)}
+          {[1, 2, 3, 4, 5].map((n, i) => <text key={`n${n}`} x={BX + i * BW + BW / 2} y={BY - 8} fill="#b59cf0">{n}</text>)}
+        </g>
+      )}
+      {showArrows && <g className="sv-arrows" stroke="#2f7a4b" strokeWidth="2" fill="none" strokeLinecap="round">
+        {[1, 2, 3, 4].map((i) => <path key={i} d={`M${BX + i * BW - 10} ${BY + BH + 32} q10 -8 20 0`} />)}
+      </g>}
+      {showTool && (
+        <g className={`sv-tool tool-${technique.tool}`}>
+          <Tool type={technique.tool} color={technique.palette[3]} />
+        </g>
+      )}
+    </svg>
+  )
+}
+
+/* Tarjeta de técnica: la escala completa, sin animación */
+export function TechniqueArt({ technique }) {
+  return (
+    <div className="step-visual step-visual--unify technique-art-wrap">
+      <ScaleArt technique={technique} state="unify" showLabels={false} showArrows={false} viewBox="14 44 292 128" className="technique-art" />
+    </div>
+  )
+}
+
 /* Referencia visual animada de cada paso del tutorial */
-export function StepVisual({ visual }) {
-  const id = uid()
-  const labels = ['HB', 'HB', '2B', '2B', '4B']
-  const bx = 30, bw = 52, by = 70, bh = 76
+export function StepVisual({ technique, step }) {
+  const visual = STATES[step] || 'unify'
   return (
     <div className={`step-visual step-visual--${visual}`}>
-      <svg viewBox="0 0 320 220" aria-hidden="true">
-        <defs><GraphiteDefs id={id} /></defs>
-        <rect x="14" y="20" width="292" height="184" rx="6" fill="#fffdf9" filter={`url(#paper-${id})`} />
-        <rect x="14" y="20" width="292" height="184" rx="6" fill="none" stroke="#e5dcf2" strokeWidth="1.5" />
-        {/* casillas con grafito */}
-        <g filter={`url(#grain-${id})`}>
-          {GRAPHITE_TONES.map((t, i) => (
-            <g key={t} className={`sv-box sv-box-${i + 1}`} style={{ transformOrigin: `${bx + i * bw}px ${by}px` }}>
-              <rect x={bx + i * bw} y={by} width={bw} height={bh} fill={t} />
-              <rect x={bx + i * bw} y={by} width={bw} height={bh} fill={`url(#hatch-${id})`} />
-            </g>
-          ))}
-        </g>
-        {/* contorno de la franja */}
-        <g className="sv-outline" fill="none" stroke="#5a5760" strokeWidth="1.1">
-          <rect x={bx} y={by} width={bw * 5} height={bh} pathLength="100" />
-          {[1, 2, 3, 4].map((i) => (
-            <line key={i} x1={bx + i * bw} y1={by} x2={bx + i * bw} y2={by + bh} pathLength="100" />
-          ))}
-        </g>
-        {/* etiquetas de lápiz */}
-        <g className="sv-labels" fontFamily="sans-serif" fontSize="10" fontWeight="600" fill="#8b8697" textAnchor="middle">
-          {labels.map((l, i) => <text key={i} x={bx + i * bw + bw / 2} y={by + bh + 18}>{l}</text>)}
-          {[1, 2, 3, 4, 5].map((n, i) => <text key={`n${n}`} x={bx + i * bw + bw / 2} y={by - 8} fill="#b59cf0">{n}</text>)}
-        </g>
-        {/* indicadores de transición (paso 5) */}
-        <g className="sv-arrows" stroke="#2f7a4b" strokeWidth="2" fill="none" strokeLinecap="round">
-          {[1, 2, 3, 4].map((i) => (
-            <path key={i} d={`M${bx + i * bw - 10} ${by + bh + 32} q10 -8 20 0`} />
-          ))}
-        </g>
-        <Pencil className="sv-pencil" body="#6b4fc0" />
-      </svg>
+      <ScaleArt technique={technique} state={visual} showTool />
     </div>
+  )
+}
+
+/* Icono de material (lucide) dentro de un círculo */
+export function MaterialIcon({ icon, color = '#6B4FC0', size = 26 }) {
+  const C = LucideIcons[icon] || LucideIcons.Sparkles
+  return (
+    <span className="material-icon" style={{ '--mc': color }}>
+      <C size={size} strokeWidth={1.8} />
+    </span>
   )
 }
 

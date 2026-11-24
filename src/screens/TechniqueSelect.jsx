@@ -1,4 +1,4 @@
-import { technique, upcomingTechniques } from '../data/content.js'
+import { techniques } from '../data/techniques.js'
 import { Icon, MaterialIcon, TechniqueArt } from '../components/Illustrations.jsx'
 
 export default function TechniqueSelect({ onBack, onChoose }) {
@@ -7,45 +7,33 @@ export default function TechniqueSelect({ onBack, onChoose }) {
       <button className="btn-link" onClick={onBack}><Icon name="arrow-left" size={16} /> Volver</button>
       <p className="eyebrow">Paso 1 · Elige una técnica</p>
       <h2 className="title">¿Con qué quieres experimentar hoy?</h2>
-      <p className="lead narrow">Te recomendamos empezar con grafito: es accesible, necesitas muy pocos materiales y es la base para aprender luces, sombras y volumen.</p>
+      <p className="lead narrow">Todas las técnicas empiezan con el mismo ejercicio: una escala de cinco cuadros que va de lo más suave a lo más intenso. Elige la que más te llame.</p>
 
-      <div className="technique-layout">
-        <article className="card technique-card">
-          <div className="technique-media">
-            <TechniqueArt />
-            <span className="tag tag-green">Disponible</span>
-          </div>
-          <div className="technique-body">
-            <div className="technique-head">
-              <h3>{technique.name}</h3>
-              <div className="meta">
-                <span className="chip"><Icon name="level" size={14} /> {technique.level}</span>
-                <span className="chip"><Icon name="clock" size={14} /> {technique.duration}</span>
-              </div>
+      <div className="technique-grid">
+        {techniques.map((t) => (
+          <article key={t.id} className="card technique-tile" style={{ '--tc': t.color }}>
+            <div className="technique-media">
+              <TechniqueArt technique={t} />
             </div>
-            <p>{technique.description}</p>
-            <h4 className="small-title">Materiales necesarios</h4>
-            <ul className="mini-materials">
-              {technique.materials.map((m) => (
-                <li key={m.label}><MaterialIcon type={m.icon} /> {m.label}</li>
-              ))}
-            </ul>
-            <button className="btn btn-primary" onClick={onChoose}>
-              Aprender esta técnica <Icon name="arrow-right" />
-            </button>
-          </div>
-        </article>
-
-        <aside className="upcoming">
-          <h4 className="small-title">Próximas técnicas</h4>
-          <ul>
-            {upcomingTechniques.map((t) => (
-              <li key={t.name} className="upcoming-item" aria-disabled="true">
-                <span>{t.name}</span><span className="tag">{t.note}</span>
-              </li>
-            ))}
-          </ul>
-        </aside>
+            <div className="technique-body">
+              <h3>{t.name}</h3>
+              <div className="meta">
+                <span className="chip"><Icon name="level" size={14} /> {t.level}</span>
+                <span className="chip"><Icon name="clock" size={14} /> {t.duration}</span>
+              </div>
+              <p>{t.description}</p>
+              <div className="mini-materials" aria-label="Materiales">
+                {t.materials.slice(0, 4).map((m) => (
+                  <span key={m.name} title={m.name}><MaterialIcon icon={m.icon} color={t.color} size={16} /></span>
+                ))}
+                {t.materials.length > 4 && <span className="more">+{t.materials.length - 4}</span>}
+              </div>
+              <button className="btn btn-primary" onClick={() => onChoose(t.id)}>
+                Aprender esta técnica <Icon name="arrow-right" />
+              </button>
+            </div>
+          </article>
+        ))}
       </div>
     </section>
   )

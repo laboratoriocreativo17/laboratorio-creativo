@@ -2,9 +2,9 @@ import { useEffect, useState } from 'react'
 import { SparkIcon } from '../components/Illustrations.jsx'
 
 const STAGES = [
-  'Recibiendo tu fotografía…',
-  'Midiendo el tono de cada casilla…',
-  'Preparando tus recomendaciones…',
+  'Recibiendo tu foto…',
+  'Mirando tus cinco cuadros…',
+  'Preparando consejos para ti…',
 ]
 
 export default function Analyzing({ image }) {
@@ -26,7 +26,7 @@ export default function Analyzing({ image }) {
           <li key={s} className={i < stage ? 'is-done' : i === stage ? 'is-current' : ''}>{s.replace('…', '')}</li>
         ))}
       </ol>
-      <p className="hint center">Modo demostración: no se envía tu foto a ningún servidor.</p>
+      <p className="hint center">Tu foto se queda en tu dispositivo: no se envía a ningún lado.</p>
     </section>
   )
 }
